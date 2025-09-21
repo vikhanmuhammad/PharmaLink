@@ -1,52 +1,77 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Tambah / Cari Pasien</title>
-</head>
-<body>
-    <h2>Cari atau Tambah Pasien</h2>
+<?php $this->load->view('header', ['title' => 'Tambah Pasien']); ?>
 
-    <form method="post">
-        <input type="hidden" name="action" value="cari">
-        <label>Nama Pasien:</label><br>
-        <input type="text" name="nama" value="<?= isset($nama) ? $nama : '' ?>" required><br><br>
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-7">
 
-        <label>Tanggal Lahir:</label><br>
-        <input type="date" name="tgl_lahir" value="<?= isset($tgl_lahir) ? $tgl_lahir : '' ?>" required><br><br>
+            <div class="card border-primary">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="h4 mb-0">Cari atau Tambah Pasien</h2>
+                </div>
+                <div class="card-body">
+                    <p class="card-text text-muted">
+                        Masukkan nama dan tanggal lahir untuk memeriksa apakah pasien sudah ada di database.
+                    </p>
+                    
+                    <form action="<?= site_url('perawat/tambah_pasien') ?>" method="post">
+                        <input type="hidden" name="action" value="cari">
+                        <div class="mb-3">
+                            <label for="nama" class="form-label">Nama Pasien</label>
+                            <input type="text" class="form-control" id="nama" name="nama" value="<?= isset($nama) ? $nama : '' ?>" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="tgl_lahir" class="form-label">Tanggal Lahir</label>
+                            <input type="date" class="form-control" id="tgl_lahir" name="tgl_lahir" value="<?= isset($tgl_lahir) ? $tgl_lahir : '' ?>" required>
+                        </div>
+                        <hr>
+                        <div class="d-flex justify-content-between">
+                            <a href="<?= site_url('perawat/pasien'); ?>" class="btn btn-outline-secondary">Kembali ke Daftar Pasien</a>
+                            <button type="submit" class="btn btn-primary">Cari Pasien</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
 
-        <button type="submit">Cari</button>
-    </form>
+            <?php if (isset($pasien)) : ?>
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h4 class="h5 mb-0">Hasil Pencarian</h4>
+                </div>
+                <div class="card-body">
+                    <?php if ($pasien) : ?>
 
-    <br>
+                        <?php if ($pasien->ASSIGNED_PERAWAT_ID) : ?>
+                            <div class="alert alert-success mb-0">
+                                ✅ Pasien <strong><?= $pasien->NAMA ?> (<?= $pasien->TGL_LAHIR ?>)</strong> ditemukan dan sudah terdaftar pada profil Anda.
+                            </div>
+                        <?php else : ?>
+                            <div class="alert alert-info d-flex justify-content-between align-items-center mb-0">
+                                <span>Pasien <strong><?= $pasien->NAMA ?> (<?= $pasien->TGL_LAHIR ?>)</strong> ditemukan.</span>
+                                <form action="<?= site_url('perawat/tambah_pasien') ?>" method="post" class="ms-3">
+                                    <input type="hidden" name="action" value="assign">
+                                    <input type="hidden" name="pasien_id" value="<?= $pasien->PASIEN_ID ?>">
+                                    <button type="submit" class="btn btn-sm btn-success">Assign ke Profil Saya</button>
+                                </form>
+                            </div>
+                        <?php endif; ?>
 
-    <?php if (isset($pasien)) : ?>
-        <?php if ($pasien) : ?>
-
-            <?php if ($pasien->ASSIGNED_PERAWAT_ID) : ?>
-                <p style="color: green;">
-                    ✅ Pasien terdapat di database: <strong><?= $pasien->NAMA ?> (<?= $pasien->TGL_LAHIR ?>)</strong> dan sudah di-assign ke profil Anda.
-                </p>
-            <?php else : ?>
-                <p>Pasien terdapat di database: <strong><?= $pasien->NAMA ?> (<?= $pasien->TGL_LAHIR ?>)</strong></p>
-                <form method="post">
-                    <input type="hidden" name="action" value="assign">
-                    <input type="hidden" name="pasien_id" value="<?= $pasien->PASIEN_ID ?>">
-                    <button type="submit">Assign ke Perawat</button>
-                </form>
+                    <?php else : ?>
+                        <div class="alert alert-warning d-flex justify-content-between align-items-center mb-0">
+                            <span>Pasien tidak ditemukan. Tambahkan sebagai data baru?</span>
+                            <form action="<?= site_url('perawat/tambah_pasien') ?>" method="post" class="ms-3">
+                                <input type="hidden" name="action" value="tambah">
+                                <input type="hidden" name="nama" value="<?= isset($nama) ? $nama : '' ?>">
+                                <input type="hidden" name="tgl_lahir" value="<?= isset($tgl_lahir) ? $tgl_lahir : '' ?>">
+                                <button type="submit" class="btn btn-sm btn-primary">Ya, Tambah Pasien</button>
+                            </form>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            </div>
             <?php endif; ?>
 
-        <?php else : ?>
-            <p>Pasien tidak ditemukan di database. Tambahkan data baru?</p>
-            <form method="post">
-                <input type="hidden" name="action" value="tambah">
-                <input type="hidden" name="nama" value="<?= isset($nama) ? $nama : '' ?>">
-                <input type="hidden" name="tgl_lahir" value="<?= isset($tgl_lahir) ? $tgl_lahir : '' ?>">
-                <button type="submit">Tambah Pasien Baru</button>
-            </form>
-        <?php endif; ?>
-    <?php endif; ?>
+        </div>
+    </div>
+</div>
 
-    <br>
-    <a href="<?= site_url('perawat/pasien'); ?>">Kembali</a>
-</body>
-</html>
+<?php $this->load->view('footer'); ?>

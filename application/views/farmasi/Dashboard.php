@@ -1,88 +1,93 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Dashboard Farmasi</title>
-    <style>
-        body { font-family: Arial, sans-serif; }
-        h1 { color: #2F4F4F; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
-        th { background-color: #ddd; }
-        button { padding: 5px 10px; border: none; border-radius: 5px; background-color: #1E90FF; color: #fff; cursor: pointer; }
-        button.reject { background-color: #FF4500; }
-        button:hover { opacity: 0.8; }
-        .flash { padding: 10px; margin-bottom: 20px; border-radius: 5px; }
-        .success { background-color: #d4edda; color: #155724; }
-        .error { background-color: #f8d7da; color: #721c24; }
-    </style>
-</head>
-<body>
-    <h1>Selamat datang, <?= $this->session->userdata('USERNAME'); ?>!</h1>
+<?php $this->load->view('header', ['title' => 'Dashboard']); ?>
+
+<div class="container mt-4">
+
+    <h1 class="display-5">Selamat datang, <small class="text-muted"><?= $this->session->userdata('USERNAME'); ?>!</small></h1>
 
     <?php if($this->session->flashdata('success')): ?>
-        <div class="flash success"><?= $this->session->flashdata('success'); ?></div>
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <?= $this->session->flashdata('success'); ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
     <?php endif; ?>
     <?php if($this->session->flashdata('error')): ?>
-        <div class="flash error"><?= $this->session->flashdata('error'); ?></div>
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <?= $this->session->flashdata('error'); ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
     <?php endif; ?>
 
-    <div class="menu-box">
-        <h3>Menu:</h3>
-        <ul>
-            <li>📦 <a href="<?= site_url('obat'); ?>">Lihat Stok Obat</a></li>
-        </ul>
+    <div class="card my-4">
+        <div class="card-header">
+            <h3>Menu</h3>
+        </div>
+        <div class="card-body">
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item">📦 <a href="<?= site_url('obat'); ?>" class="text-decoration-none">Lihat Stok Obat</a></li>
+            </ul>
+        </div>
     </div>
 
-    <h2>Pemesanan Obat</h2>
+    <h2 class="mt-5">Pemesanan Obat</h2>
 
     <?php if(!empty($pemesanan)): ?>
-        <table>
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Pasien</th>
-                    <th>Obat</th>
-                    <th>Stok</th>
-                    <th>Jumlah</th>
-                    <th>Keterangan</th>
-                    <th>Tanggal Pesan</th>
-                    <th>Penginput</th>
-                    <th>Role</th>
-                    <th>Aksi</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php foreach($pemesanan as $p): ?>
-                <tr>
-                    <td><?= $p->PEMESANAN_ID ?></td>
-                    <td><?= $p->NAMA_PASIEN ?></td>
-                    <td><?= $p->NAMA_OBAT ?></td>
-                    <td><?= $p->STOK_OBAT ?></td>
-                    <td><?= $p->JUMLAH ?></td>
-                    <td><?= $p->KETERANGAN ?></td>
-                    <td><?= $p->TGL_PESAN ?></td>
-                    <td><?= $p->NAMA_PENGINPUT ?></td>
-                    <td><?= $p->ROLE_PENGINPUT ?></td>
-                    <td>
-                        <?php if($p->STATUS == 'pending'): ?>
-                            <a href="<?= site_url('farmasi/approve/'.$p->PEMESANAN_ID) ?>">
-                                <button>ACC</button>
-                            </a>
-                            <a href="<?= site_url('farmasi/reject/'.$p->PEMESANAN_ID) ?>">
-                                <button class="reject">Reject</button>
-                            </a>
-                        <?php else: ?>
-                            <?= ucfirst($p->STATUS) ?>
-                        <?php endif; ?>
-                    </td>
-                </tr>
-                <?php endforeach; ?>
-            </tbody>
-        </table>
+        <div class="table-responsive">
+            <table class="table table-striped table-bordered table-hover">
+                <thead class="table-dark">
+                    <tr>
+                        <th>ID</th>
+                        <th>Pasien</th>
+                        <th>Obat</th>
+                        <th>Stok</th>
+                        <th>Jumlah</th>
+                        <th>Keterangan</th>
+                        <th>Tanggal Pesan</th>
+                        <th>Penginput</th>
+                        <th>Role</th>
+                        <th class="text-center">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach($pemesanan as $p): ?>
+                    <tr>
+                        <td class="align-middle"><?= $p->PEMESANAN_ID ?></td>
+                        <td class="align-middle"><?= $p->NAMA_PASIEN ?></td>
+                        <td class="align-middle"><?= $p->NAMA_OBAT ?></td>
+                        <td class="align-middle"><?= $p->STOK_OBAT ?></td>
+                        <td class="align-middle"><?= $p->JUMLAH ?></td>
+                        <td class="align-middle"><?= $p->KETERANGAN ?></td>
+                        <td class="align-middle"><?= $p->TGL_PESAN ?></td>
+                        <td class="align-middle"><?= $p->NAMA_PENGINPUT ?></td>
+                        <td class="align-middle"><?= $p->ROLE_PENGINPUT ?></td>
+                        <td class="text-center">
+                            <?php if($p->STATUS == 'pending'): ?>
+                                <div class="btn-group" role="group">
+                                    <a href="<?= site_url('farmasi/approve/'.$p->PEMESANAN_ID) ?>" class="btn btn-sm btn-success">ACC</a>
+                                    <a href="<?= site_url('farmasi/reject/'.$p->PEMESANAN_ID) ?>" class="btn btn-sm btn-danger">Reject</a>
+                                </div>
+                            <?php else: ?>
+                                <?php
+                                    // Ganti status teks menjadi badge berwarna
+                                    $badge_class = 'bg-secondary'; // default
+                                    if ($p->STATUS == 'approved') $badge_class = 'bg-success';
+                                    if ($p->STATUS == 'rejected') $badge_class = 'bg-danger';
+                                ?>
+                                <span class="badge <?= $badge_class ?>"><?= ucfirst($p->STATUS) ?></span>
+                            <?php endif; ?>
+                        </td>
+                    </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
     <?php else: ?>
-        <p>Tidak ada pemesanan obat.</p>
+        <div class="alert alert-info mt-3" role="alert">
+            Tidak ada pemesanan obat saat ini.
+        </div>
     <?php endif; ?>
 
-    <br><a href="<?= site_url('auth/logout'); ?>">Logout</a>
-</body>
-</html>
+    <a href="<?= site_url('auth/logout'); ?>" class="btn btn-outline-secondary mt-4 mb-5">Logout</a>
+
+</div>
+
+<?php $this->load->view('footer'); ?> 

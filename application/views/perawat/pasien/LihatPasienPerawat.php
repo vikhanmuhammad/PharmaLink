@@ -1,31 +1,50 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Daftar Pasien</title>
-</head>
-<body>
-    <h2>Daftar Pasien Anda</h2>
-    <a href="<?= site_url('perawat/tambah_pasien'); ?>">Tambah Pasien Baru</a> |
-    <a href="<?= site_url('perawat'); ?>">Dashboard</a>
-    <br><br>
+<?php $this->load->view('header', ['title' => 'Daftar Pasien']); ?>
 
-    <?php if (empty($pasien)): ?>
-        <p>Data pasien kosong.</p>
-    <?php else: ?>
-        <table border="1" cellpadding="5" cellspacing="0">
-            <tr>
-                <th>ID</th>
-                <th>Nama</th>
-                <th>Tanggal Lahir</th>
-            </tr>
-            <?php foreach ($pasien as $p): ?>
-            <tr>
-                <td><?= $p->PASIEN_ID; ?></td>
-                <td><?= $p->NAMA; ?></td>
-                <td><?= $p->TGL_LAHIR; ?></td>
-            </tr>
-            <?php endforeach; ?>
-        </table>
-    <?php endif; ?>
-</body>
-</html>
+<div class="container mt-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="display-6">Daftar Pasien Anda</h2>
+        <div>
+            <a href="<?= site_url('perawat/tambah_pasien'); ?>" class="btn btn-primary">
+                + Tambah Pasien Baru
+            </a>
+            <a href="<?= site_url('perawat'); ?>" class="btn btn-outline-secondary">
+                Kembali ke Dashboard
+            </a>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <?php if (empty($pasien)): ?>
+                <div class="alert alert-info mb-0" role="alert">
+                    Anda belum memiliki data pasien. Silakan tambahkan pasien baru.
+                </div>
+            <?php else: ?>
+                <div class="table-responsive">
+                    <table class="table table-striped table-bordered table-hover mb-0">
+                        <thead class="table-primary">
+                            <tr>
+                                <th>ID</th>
+                                <th>Nama</th>
+                                <th>Tanggal Lahir</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($pasien as $p): ?>
+                            <tr>
+                                <td class="align-middle"><?= $p->PASIEN_ID; ?></td>
+                                <td class="align-middle"><?= $p->NAMA; ?></td>
+                                <td class="align-middle"><?= $p->TGL_LAHIR; ?></td>
+                            </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+            <?php endif; ?>
+        </div>
+    </div>
+
+</div>
+
+<?php $this->load->view('footer'); ?>
