@@ -27,7 +27,7 @@
         </div>
         <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table table-striped table-bordered table-hover mb-0">
+                <table id="pasienTable" class="table table-striped table-bordered table-hover mb-0">
                     <thead class="table-success">
                         <tr>
                             <th>ID Pasien</th>
@@ -91,4 +91,16 @@
       </div>
   </div>
 </div>
+
+<script>
+$(document).ready(function() {
+    $('#pasienTable').DataTable({
+        "paging": true,
+        "searching": true,
+        "ordering": true,
+        "order": [[0, "asc"]]
+    });
+});
+</script>
+
 <?php $this->load->view('footer'); ?>

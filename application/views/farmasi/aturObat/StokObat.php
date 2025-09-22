@@ -17,7 +17,7 @@
     <div class="card">
         <div class="card-body">
             <div class="table-responsive">
-                <table class="table table-striped table-bordered table-hover">
+                <table id="tabelObat" class="table table-striped table-bordered table-hover">
                     <thead class="table-success">
                         <tr>
                             <th>ID</th>
@@ -184,6 +184,17 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('edit_keterangan').value = this.getAttribute('data-keterangan');
             document.getElementById('edit_stok').value = this.getAttribute('data-stok');
         });
+    });
+});
+</script>
+
+<script>
+$(document).ready(function() {
+    $('#tabelObat').DataTable({
+        "paging": true,
+        "searching": true,
+        "ordering": true,
+        "order": [[0, "asc"]]
     });
 });
 </script>
