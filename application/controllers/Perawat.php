@@ -20,25 +20,22 @@ class Perawat extends CI_Controller {
 
     public function index() {
         $user_id = $this->session->userdata('user_id');
-        
+
         $data['pemesanan'] = $this->db
-            ->select('po.PEMESANAN_ID, p.NAMA as NAMA_PASIEN, o.NAMA_OBAT, po.JUMLAH, po.KETERANGAN, po.TGL_PESAN, po.STATUS')
-            ->from('PEMESANAN_OBAT po')
+            ->select('po.PEMESANAN_ID, p.NAMA as NAMA_PASIEN, o.NAMA_OBAT, pd.JUMLAH, pd.KETERANGAN, po.TGL_PESAN, po.STATUS')
+            ->from('PEMESANAN po')
+            ->join('PEMESANAN_DETAIL pd', 'pd.PEMESANAN_ID = po.PEMESANAN_ID')
             ->join('PASIEN p', 'p.PASIEN_ID = po.PASIEN_ID')
-            ->join('OBAT o', 'o.OBAT_ID = po.OBAT_ID')
+            ->join('OBAT o', 'o.OBAT_ID = pd.OBAT_ID')
             ->where('po.USER_ID', $user_id)
-            ->order_by('po.TGL_PESAN', 'DESC')
+            ->order_by('po.TGL_PESAN','DESC')
             ->get()
             ->result();
-    
-        $perawat = $this->db->get_where('PERAWAT', ['USER_ID' => $user_id])->row();
-        if ($perawat) {
-            $data['pasien'] = $this->Perawat_model->get_pasien_by_perawat($perawat->PERAWAT_ID);
-        } else {
-            $data['pasien'] = [];
-        }
+
+        $perawat = $this->db->get_where('PERAWAT',['USER_ID'=>$user_id])->row();
+        $data['pasien'] = $perawat ? $this->Perawat_model->get_pasien_by_perawat($perawat->PERAWAT_ID) : [];
         $data['obat'] = $this->db->get('OBAT')->result();
-        
+
         $this->load->view('perawat/dashboard', $data);
     }
 
@@ -138,74 +135,99 @@ class Perawat extends CI_Controller {
 
     public function pemesanan_obat() {
         if ($this->input->post()) {
+    
             $id = $this->db->query("SELECT PEMESANAN_REQ.NEXTVAL as ID FROM dual")->row()->ID;
-            
+    
             $data_insert = [
                 'PEMESANAN_ID' => $id,
-                'PASIEN_ID'   => $this->input->post('pasien_id'),
-                'OBAT_ID'     => $this->input->post('obat_id'),
-                'JUMLAH'      => $this->input->post('jumlah'),
-                'KETERANGAN'  => $this->input->post('keterangan'),
-                'USER_ID'     => $this->session->userdata('user_id'),
-                'STATUS'      => 'pending'
+                'PASIEN_ID'    => $this->input->post('pasien_id'),
+                'USER_ID'      => $this->session->userdata('user_id'),
+                'STATUS'       => 'pending'
             ];
-            $this->db->set('TGL_PESAN', "TO_DATE('" . date('Y-m-d H:i:s') . "', 'YYYY-MM-DD HH24:MI:SS')", false);
-            
-            $this->db->insert('PEMESANAN_OBAT', $data_insert);
+            $this->db->set('TGL_PESAN', "TO_DATE('".date('Y-m-d H:i:s')."','YYYY-MM-DD HH24:MI:SS')", false);
+            $this->db->insert('PEMESANAN', $data_insert);
     
-            $this->session->set_flashdata('success', 'Pemesanan obat berhasil dibuat.');
-            
+            $obat_ids   = $this->input->post('obat_id');
+            $jumlah     = $this->input->post('jumlah');
+            $keterangan = $this->input->post('keterangan');
+    
+            if (!is_array($obat_ids)) $obat_ids = [$obat_ids];
+            if (!is_array($jumlah)) $jumlah = [$jumlah];
+            if (!is_array($keterangan)) $keterangan = [$keterangan];
+    
+            foreach($obat_ids as $i => $obat_id) {
+                $this->db->insert('PEMESANAN_DETAIL', [
+                    'PEMESANAN_ID' => $id,
+                    'OBAT_ID'      => $obat_id,
+                    'JUMLAH'       => $jumlah[$i] ?? 1,
+                    'KETERANGAN'   => $keterangan[$i] ?? null
+                ]);
+            }
+    
+            $this->session->set_flashdata('success','Pemesanan obat berhasil dibuat.');
             redirect('perawat');
+    
         } else {
             redirect('perawat');
         }
     }
+    
 
     public function edit_pemesanan($id) {
-        $pemesanan = $this->db
-            ->select('po.*, p.NAMA as NAMA_PASIEN, o.NAMA_OBAT')
-            ->from('PEMESANAN_OBAT po')
-            ->join('PASIEN p', 'p.PASIEN_ID = po.PASIEN_ID')
-            ->join('OBAT o', 'o.OBAT_ID = po.OBAT_ID')
-            ->where('po.PEMESANAN_ID', $id)
-            ->get()
-            ->row();
-    
-        if (!$pemesanan) {
-            show_404();
-        }
-        
+        $pemesanan = $this->db->get_where('PEMESANAN', ['PEMESANAN_ID' => $id])->row();
+        if (!$pemesanan) show_404();
         if ($pemesanan->STATUS !== 'pending') {
-            $this->session->set_flashdata('error', 'Pesanan sudah tidak bisa diedit.');
+            $this->session->set_flashdata('error','Pesanan sudah tidak bisa diedit.');
             redirect('perawat');
         }
-    
+
+        $pemesanan->detail = $this->db
+            ->select('pd.*, o.NAMA_OBAT, o.STOK')
+            ->from('PEMESANAN_DETAIL pd')
+            ->join('OBAT o', 'o.OBAT_ID = pd.OBAT_ID')
+            ->where('pd.PEMESANAN_ID', $id)
+            ->get()
+            ->result();
+
         $data['pemesanan'] = $pemesanan;
         $data['pasien'] = $this->db->get('PASIEN')->result();
-        $data['obat']   = $this->db->get('OBAT')->result();
-    
+        $data['obat'] = $this->db->get('OBAT')->result();
+
         $this->load->view('perawat/pemesanan/EditPemesanan', $data);
     }
-    
+
     public function update_pemesanan($id) {
-        $pemesanan = $this->db->get_where('PEMESANAN_OBAT', ['PEMESANAN_ID' => $id])->row();
-    
+        $pemesanan = $this->db->get_where('PEMESANAN', ['PEMESANAN_ID'=>$id])->row();
         if (!$pemesanan || $pemesanan->STATUS !== 'pending') {
-            $this->session->set_flashdata('error', 'Pesanan tidak valid atau sudah tidak bisa diedit.');
+            $this->session->set_flashdata('error','Pesanan tidak valid atau sudah tidak bisa diedit.');
             redirect('perawat');
         }
-    
-        $data_update = [
-            'PASIEN_ID'   => $this->input->post('pasien_id'),
-            'OBAT_ID'     => $this->input->post('obat_id'),
-            'JUMLAH'      => $this->input->post('jumlah'),
-            'KETERANGAN'  => $this->input->post('keterangan')
-        ];
-    
+
         $this->db->where('PEMESANAN_ID', $id);
-        $this->db->update('PEMESANAN_OBAT', $data_update);
-    
-        $this->session->set_flashdata('success', 'Pesanan berhasil diperbarui.');
+        $this->db->update('PEMESANAN', [
+            'PASIEN_ID' => $this->input->post('pasien_id')
+        ]);
+
+        $this->db->delete('PEMESANAN_DETAIL',['PEMESANAN_ID'=>$id]);
+
+        $obat_ids   = $this->input->post('obat_id');
+        $jumlah     = $this->input->post('jumlah');
+        $keterangan = $this->input->post('keterangan');
+
+        if(!is_array($obat_ids)) $obat_ids = [$obat_ids];
+        if(!is_array($jumlah)) $jumlah = [$jumlah];
+        if(!is_array($keterangan)) $keterangan = [$keterangan];
+
+        foreach($obat_ids as $i => $obat_id) {
+            $this->db->insert('PEMESANAN_DETAIL', [
+                'PEMESANAN_ID' => $id,
+                'OBAT_ID'      => $obat_id,
+                'JUMLAH'       => $jumlah[$i] ?? 1,
+                'KETERANGAN'   => $keterangan[$i] ?? null
+            ]);
+        }
+
+        $this->session->set_flashdata('success','Pesanan berhasil diperbarui.');
         redirect('perawat');
     }
 }

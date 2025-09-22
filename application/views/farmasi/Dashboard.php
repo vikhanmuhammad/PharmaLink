@@ -54,34 +54,68 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <?php foreach($pemesanan as $p): ?>
-                            <tr>
-                                <td class="align-middle"><?= $p->PEMESANAN_ID ?></td>
-                                <td class="align-middle"><?= $p->NAMA_PASIEN ?></td>
-                                <td class="align-middle"><?= $p->NAMA_OBAT ?></td>
-                                <td class="align-middle text-center"><?= $p->JUMLAH ?></td>
-                                <td class="align-middle"><?= $p->KETERANGAN ?></td>
-                                <td class="align-middle"><?= $p->TGL_PESAN ?></td>
-                                <td class="align-middle"><?= $p->NAMA_PENGINPUT ?></td>
-                                <td class="align-middle"><?= $p->ROLE_PENGINPUT ?></td>
-                                <td class="text-center">
-                                    <?php if($p->STATUS == 'pending'): ?>
-                                        <div class="btn-group" role="group">
-                                            <a href="<?= site_url('farmasi/approve/'.$p->PEMESANAN_ID) ?>" class="btn btn-sm btn-success">ACC</a>
-                                            <a href="<?= site_url('farmasi/reject/'.$p->PEMESANAN_ID) ?>" class="btn btn-sm btn-danger">Reject</a>
-                                        </div>
-                                    <?php else: ?>
-                                        <?php
-                                            $badge_class = 'bg-secondary';
-                                            if ($p->STATUS == 'approved') $badge_class = 'bg-success';
-                                            if ($p->STATUS == 'rejected') $badge_class = 'bg-danger';
-                                        ?>
-                                        <span class="badge <?= $badge_class ?>"><?= ucfirst($p->STATUS) ?></span>
-                                    <?php endif; ?>
-                                </td>
-                            </tr>
-                            <?php endforeach; ?>
-                        </tbody>
+                            <?php if (!empty($pemesanan)): ?>
+                                <?php
+                                // Kelompokkan data berdasarkan PEMESANAN_ID
+                                $pesanan_grouped = [];
+                                foreach($pemesanan as $p){
+                                    $pesanan_grouped[$p->PEMESANAN_ID]['info'] = [
+                                        'NAMA_PASIEN'     => $p->NAMA_PASIEN,
+                                        'TGL_PESAN'       => $p->TGL_PESAN,
+                                        'NAMA_PENGINPUT'  => $p->NAMA_PENGINPUT,
+                                        'ROLE_PENGINPUT'  => $p->ROLE_PENGINPUT,
+                                        'STATUS'          => $p->STATUS
+                                    ];
+                                    $pesanan_grouped[$p->PEMESANAN_ID]['obat'][] = [
+                                        'NAMA_OBAT' => $p->NAMA_OBAT,
+                                        'JUMLAH'    => $p->JUMLAH,
+                                        'KETERANGAN'=> $p->KETERANGAN
+                                    ];
+                                }
+                                ?>
+
+                                <?php foreach($pesanan_grouped as $id => $data): ?>
+                                    <tr>
+                                        <td class="align-middle"><?= $id; ?></td>
+                                        <td class="align-middle"><?= $data['info']['NAMA_PASIEN']; ?></td>
+                                        <td class="align-middle">
+                                            <?= implode(', ', array_column($data['obat'], 'NAMA_OBAT')); ?>
+                                        </td>
+                                        <td class="align-middle text-center">
+                                            <?= implode(', ', array_column($data['obat'], 'JUMLAH')); ?>
+                                        </td>
+                                        <td class="align-middle">
+                                            <?= implode('; ', array_column($data['obat'], 'KETERANGAN')); ?>
+                                        </td>
+                                        <td class="align-middle"><?= $data['info']['TGL_PESAN']; ?></td>
+                                        <td class="align-middle"><?= $data['info']['NAMA_PENGINPUT']; ?></td>
+                                        <td class="align-middle"><?= $data['info']['ROLE_PENGINPUT']; ?></td>
+                                        <td class="text-center align-middle">
+                                            <?php if ($data['info']['STATUS'] == 'pending'): ?>
+                                                <div class="btn-group" role="group">
+                                                    <a href="<?= site_url('farmasi/approve/'.$id) ?>" class="btn btn-sm btn-success">ACC</a>
+                                                    <a href="<?= site_url('farmasi/reject/'.$id) ?>" class="btn btn-sm btn-danger">Reject</a>
+                                                </div>
+                                            <?php else: ?>
+                                                <?php
+                                                    $badge_class = 'bg-secondary';
+                                                    if ($data['info']['STATUS'] == 'approved') $badge_class = 'bg-success';
+                                                    if ($data['info']['STATUS'] == 'rejected') $badge_class = 'bg-danger';
+                                                ?>
+                                                <span class="badge <?= $badge_class ?>"><?= ucfirst($data['info']['STATUS']); ?></span>
+                                            <?php endif; ?>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+
+                            <?php else: ?>
+                                <tr>
+                                    <td colspan="9" class="text-center text-muted p-4">
+                                        <em>Tidak ada pemesanan obat saat ini.</em>
+                                    </td>
+                                </tr>
+                            <?php endif; ?>
+                            </tbody>
                     </table>
                 </div>
             <?php else: ?>
