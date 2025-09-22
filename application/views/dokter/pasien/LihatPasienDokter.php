@@ -5,7 +5,7 @@
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h2 class="display-6">Daftar Pasien Anda</h2>
         <div>
-            <a href="<?= site_url('dokter/tambah_pasien'); ?>" class="btn btn-primary">
+            <a href="<?= site_url('dokter/tambah_pasien'); ?>" class="btn btn-success">
                 + Tambah Pasien Baru
             </a>
             <a href="<?= site_url('dokter'); ?>" class="btn btn-outline-secondary">
@@ -23,7 +23,7 @@
             <?php else: ?>
                 <div class="table-responsive">
                     <table class="table table-striped table-bordered table-hover mb-0">
-                        <thead class="table-primary">
+                        <thead class="table-success">
                             <tr>
                                 <th>ID</th>
                                 <th>Nama</th>

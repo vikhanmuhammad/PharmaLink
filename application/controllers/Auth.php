@@ -10,7 +10,6 @@ class Auth extends CI_Controller {
     }
 
     public function index() {
-        // kalau user sudah login, jangan biarkan akses halaman login lagi
         if ($this->session->userdata('logged_in')) {
             $this->_redirect_by_role();
         }
@@ -24,9 +23,7 @@ class Auth extends CI_Controller {
 
         $user = $this->User_model->get_user_by_username($username);
 
-        // if ($user && password_verify($password, $user->password)) {
         if ($user && $password === $user->PASSWORD) {
-            // simpan session
             $this->session->set_userdata([
                 'user_id' => $user->ID,
                 'username' => $user->USERNAME,
@@ -34,7 +31,6 @@ class Auth extends CI_Controller {
                 'logged_in' => TRUE
             ]);
 
-            // redirect sesuai role
             if ($user->ROLE == 'dokter') {
                 redirect('dokter');
             } elseif ($user->ROLE == 'perawat') {
@@ -66,7 +62,6 @@ class Auth extends CI_Controller {
         } elseif ($role == 'admin_farmasi') {
             redirect('farmasi');
         } else {
-            // default kalau role tidak dikenali
             redirect('auth/logout');
         }
     }

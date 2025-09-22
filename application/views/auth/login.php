@@ -13,9 +13,9 @@
 </style>
 
 <div class="container-login">
-  <div class="card border-primary" style="width: 25rem;">
+  <div class="card border-success" style="width: 25rem;">
     
-    <div class="card-header bg-primary text-white text-center">
+    <div class="card-header bg-success text-white text-center">
       <h2 class="h4 mb-0">Login Sistem Farmasi</h2>
     </div>
 
@@ -36,7 +36,7 @@
           <input type="password" class="form-control" id="password" name="password" required>
         </div>
         <div class="d-grid mt-4">
-          <button type="submit" class="btn btn-primary">Login</button>
+          <button type="submit" class="btn btn-success">Login</button>
         </div>
       </form>
       </div>

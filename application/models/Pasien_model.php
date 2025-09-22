@@ -7,7 +7,7 @@ class Pasien_model extends CI_Model {
 
     public function insert($data) {
         $this->db->insert($this->table, $data);
-        $this->db->select('PASIEN_SEQ.CURRVAL as id FROM DUAL', FALSE); // gunakan sequence
+        $this->db->select('PASIEN_SEQ.CURRVAL as id FROM DUAL', FALSE);
         $row = $this->db->get()->row();
         return $row->ID;
     }

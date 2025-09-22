@@ -9,12 +9,10 @@ class Dokter extends CI_Controller {
         $this->load->model('Dokter_model');
         $this->load->library('session');
 
-        // Cek apakah user sudah login
         if (!$this->session->userdata('logged_in')) {
             redirect('auth');
         }
 
-        // Cek role: hanya dokter & super_admin yang boleh
         if (!in_array($this->session->userdata('role'), ['dokter', 'super_admin'])) {
             redirect('auth/no_access');
         }
@@ -22,8 +20,7 @@ class Dokter extends CI_Controller {
 
     public function index() {
         $user_id = $this->session->userdata('user_id');
-    
-        // Ambil daftar pemesanan obat milik dokter ini
+        
         $data['pemesanan'] = $this->db
             ->select('po.PEMESANAN_ID, p.NAMA as NAMA_PASIEN, o.NAMA_OBAT, po.JUMLAH, po.KETERANGAN, po.TGL_PESAN, po.STATUS')
             ->from('PEMESANAN_OBAT po')
@@ -34,11 +31,16 @@ class Dokter extends CI_Controller {
             ->get()
             ->result();
     
+        $dokter = $this->db->get_where('DOKTER', ['USER_ID' => $user_id])->row();
+        if ($dokter) {
+            $data['pasien'] = $this->Dokter_model->get_pasien_by_dokter($dokter->DOKTER_ID);
+        } else {
+            $data['pasien'] = [];
+        }
+        $data['obat'] = $this->db->get('OBAT')->result();
         $this->load->view('dokter/dashboard', $data);
     }
     
-
-    // ✅ daftar pasien yg terkait dengan dokter
     public function pasien() {
         $user_id = $this->session->userdata('user_id');
         $dokter  = $this->db->get_where('DOKTER', ['USER_ID' => $user_id])->row();
@@ -55,7 +57,6 @@ class Dokter extends CI_Controller {
 
     public function tambah_pasien()
     {
-        // Cek apakah ada pengiriman data dari form (method POST)
         if ($this->input->post('action')) {
             $action = $this->input->post('action');
     
@@ -63,13 +64,10 @@ class Dokter extends CI_Controller {
                 $nama = $this->input->post('nama');
                 $tgl_lahir = $this->input->post('tgl_lahir');
     
-                // ✅ LANGKAH 1: Ambil ID dokter yang sedang login
                 $user_id = $this->session->userdata('user_id');
                 $dokter = $this->db->get_where('DOKTER', ['USER_ID' => $user_id])->row();
                 $dokter_id = $dokter ? $dokter->DOKTER_ID : null;
-    
-                // ✅ LANGKAH 2: Modifikasi Query SQL dengan LEFT JOIN
-                // Kita memilih DOKTER_PASIEN.DOKTER_ID sebagai penanda apakah sudah di-assign
+
                 $sql = "
                     SELECT 
                         p.*, 
@@ -81,8 +79,7 @@ class Dokter extends CI_Controller {
                     WHERE 
                         p.NAMA = UPPER(?) AND p.TGL_LAHIR = ?
                 ";
-    
-                // Binding untuk query: dokter_id, nama, tgl_lahir
+
                 $query = $this->db->query($sql, [$dokter_id, $nama, $tgl_lahir]);
                 $pasien = $query->row();
     
@@ -90,16 +87,13 @@ class Dokter extends CI_Controller {
                 $data['tgl_lahir'] = $tgl_lahir;
                 $data['pasien'] = $pasien;
     
-                // Muat view dengan data hasil pencarian
                 $this->load->view('dokter/pasien/TambahPasienDokter', $data);
             } elseif ($action == 'assign') {
-                // ... (kode assign Anda tidak perlu diubah) ...
                 $pasien_id = $this->input->post('pasien_id');
                 $user_id = $this->session->userdata('user_id');
                 $dokter = $this->db->get_where('DOKTER', ['USER_ID' => $user_id])->row();
     
                 if ($dokter) {
-                    // Sebaiknya cek dulu agar tidak duplikat
                     $is_assigned = $this->db->get_where('DOKTER_PASIEN', [
                         'DOKTER_ID' => $dokter->DOKTER_ID,
                         'PASIEN_ID' => $pasien_id
@@ -115,7 +109,6 @@ class Dokter extends CI_Controller {
                 $this->session->set_flashdata('success', 'Pasien berhasil di-assign.');
                 redirect('dokter/pasien');
             } elseif ($action == 'tambah') {
-                // ... (kode tambah Anda tidak perlu diubah) ...
                 $nama = $this->input->post('nama');
                 $tgl_lahir = $this->input->post('tgl_lahir');
     
@@ -137,30 +130,15 @@ class Dokter extends CI_Controller {
                 redirect('dokter/pasien');
             }
         } else {
-            // --- JIKA TIDAK ADA DATA POST (KUNJUNGAN AWAL) ---
             $this->load->view('dokter/pasien/TambahPasienDokter');
         }
     }
     
     public function pemesanan_obat() {
-        $user_id = $this->session->userdata('user_id');
-    
-        // ambil dokter_id sesuai user login
-        $dokter = $this->db->get_where('DOKTER', ['USER_ID' => $user_id])->row();
-        if (!$dokter) {
-            show_error("Dokter tidak ditemukan.");
-        }
-    
-        // pasien yang terdaftar untuk dokter ini
-        $data['pasien'] = $this->Dokter_model->get_pasien_by_dokter($dokter->DOKTER_ID);
-    
-        // daftar obat
-        $data['obat'] = $this->db->get('OBAT')->result();
-
-        $id = $this->db->query("SELECT PEMESANAN_REQ.NEXTVAL as ID FROM dual")->row()->ID;
-    
         if ($this->input->post()) {
-            $data = [
+            $id = $this->db->query("SELECT PEMESANAN_REQ.NEXTVAL as ID FROM dual")->row()->ID;
+            
+            $data_insert = [
                 'PEMESANAN_ID' => $id,
                 'PASIEN_ID'   => $this->input->post('pasien_id'),
                 'OBAT_ID'     => $this->input->post('obat_id'),
@@ -169,17 +147,64 @@ class Dokter extends CI_Controller {
                 'USER_ID'     => $this->session->userdata('user_id'),
                 'STATUS'      => 'pending'
             ];
-            
-            // tambahkan kolom TGL_PESAN dengan TO_DATE tanpa di-escape
             $this->db->set('TGL_PESAN', "TO_DATE('" . date('Y-m-d H:i:s') . "', 'YYYY-MM-DD HH24:MI:SS')", false);
             
-            $this->db->insert('PEMESANAN_OBAT', $data);
+            $this->db->insert('PEMESANAN_OBAT', $data_insert);
     
             $this->session->set_flashdata('success', 'Pemesanan obat berhasil dibuat.');
-            redirect('dokter/pemesanan_obat');
+            
+            redirect('dokter');
+        } else {
+            redirect('dokter');
+        }
+    }
+     
+    public function edit_pemesanan($id) {
+        $pemesanan = $this->db
+            ->select('po.*, p.NAMA as NAMA_PASIEN, o.NAMA_OBAT')
+            ->from('PEMESANAN_OBAT po')
+            ->join('PASIEN p', 'p.PASIEN_ID = po.PASIEN_ID')
+            ->join('OBAT o', 'o.OBAT_ID = po.OBAT_ID')
+            ->where('po.PEMESANAN_ID', $id)
+            ->get()
+            ->row();
+    
+        if (!$pemesanan) {
+            show_404();
+        }
+        
+        if ($pemesanan->STATUS !== 'pending') {
+            $this->session->set_flashdata('error', 'Pesanan sudah tidak bisa diedit.');
+            redirect('dokter');
         }
     
-        $this->load->view('dokter/pemesanan/tambahpemesanandokter', $data);
+        $data['pemesanan'] = $pemesanan;
+        $data['pasien'] = $this->db->get('PASIEN')->result();
+        $data['obat']   = $this->db->get('OBAT')->result();
+    
+        $this->load->view('dokter/pemesanan/EditPemesanan', $data);
     }
-        
+    
+    public function update_pemesanan($id) {
+        $pemesanan = $this->db->get_where('PEMESANAN_OBAT', ['PEMESANAN_ID' => $id])->row();
+    
+        if (!$pemesanan || $pemesanan->STATUS !== 'pending') {
+            $this->session->set_flashdata('error', 'Pesanan tidak valid atau sudah tidak bisa diedit.');
+            redirect('dokter');
+        }
+    
+        $data_update = [
+            'PASIEN_ID'   => $this->input->post('pasien_id'),
+            'OBAT_ID'     => $this->input->post('obat_id'),
+            'JUMLAH'      => $this->input->post('jumlah'),
+            'KETERANGAN'  => $this->input->post('keterangan')
+        ];
+    
+        $this->db->where('PEMESANAN_ID', $id);
+        $this->db->update('PEMESANAN_OBAT', $data_update);
+    
+        $this->session->set_flashdata('success', 'Pesanan berhasil diperbarui.');
+        redirect('dokter');
+    }
+    
 }

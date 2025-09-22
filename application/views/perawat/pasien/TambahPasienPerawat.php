@@ -4,8 +4,8 @@
     <div class="row justify-content-center">
         <div class="col-md-8 col-lg-7">
 
-            <div class="card border-primary">
-                <div class="card-header bg-primary text-white">
+            <div class="card border-success">
+                <div class="card-header bg-success text-white">
                     <h2 class="h4 mb-0">Cari atau Tambah Pasien</h2>
                 </div>
                 <div class="card-body">
@@ -26,7 +26,7 @@
                         <hr>
                         <div class="d-flex justify-content-between">
                             <a href="<?= site_url('perawat/pasien'); ?>" class="btn btn-outline-secondary">Kembali ke Daftar Pasien</a>
-                            <button type="submit" class="btn btn-primary">Cari Pasien</button>
+                            <button type="submit" class="btn btn-success">Cari Pasien</button>
                         </div>
                     </form>
                 </div>
@@ -62,7 +62,7 @@
                                 <input type="hidden" name="action" value="tambah">
                                 <input type="hidden" name="nama" value="<?= isset($nama) ? $nama : '' ?>">
                                 <input type="hidden" name="tgl_lahir" value="<?= isset($tgl_lahir) ? $tgl_lahir : '' ?>">
-                                <button type="submit" class="btn btn-sm btn-primary">Ya, Tambah Pasien</button>
+                                <button type="submit" class="btn btn-sm btn-success">Ya, Tambah Pasien</button>
                             </form>
                         </div>
                     <?php endif; ?>

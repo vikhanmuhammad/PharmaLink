@@ -17,7 +17,6 @@ class Farmasi extends CI_Controller {
         }
     }
 
-    // Dashboard: tampilkan semua pemesanan obat
     public function index() {
         $data['pemesanan'] = $this->db->query("
             SELECT PO.PEMESANAN_ID, PO.TGL_PESAN, PO.JUMLAH, PO.KETERANGAN, PO.STATUS,
@@ -40,27 +39,22 @@ class Farmasi extends CI_Controller {
         $this->load->view('farmasi/dashboard', $data);
     }
 
-    // ACC pemesanan
     public function approve($id) {
-        // ambil data pemesanan
         $pesan = $this->db->get_where('PEMESANAN_OBAT', ['PEMESANAN_ID' => $id])->row();
         if (!$pesan) {
             $this->session->set_flashdata('error', 'Pemesanan tidak ditemukan.');
             redirect('farmasi');
         }
 
-        // cek stok
         $obat = $this->db->get_where('OBAT', ['OBAT_ID' => $pesan->OBAT_ID])->row();
         if ($obat->STOK < $pesan->JUMLAH) {
             $this->session->set_flashdata('error', "Stok obat '$obat->NAMA' tidak cukup untuk ACC.");
             redirect('farmasi');
         }
 
-        // update status pemesanan
         $this->db->where('PEMESANAN_ID', $id)
                  ->update('PEMESANAN_OBAT', ['STATUS' => 'approved']);
 
-        // kurangi stok obat
         $this->db->set('STOK', 'STOK - ' . $pesan->JUMLAH, false)
                  ->where('OBAT_ID', $pesan->OBAT_ID)
                  ->update('OBAT');
@@ -69,7 +63,6 @@ class Farmasi extends CI_Controller {
         redirect('farmasi');
     }
 
-    // Reject pemesanan
     public function reject($id) {
         $this->db->where('PEMESANAN_ID', $id)
                  ->update('PEMESANAN_OBAT', ['STATUS' => 'rejected']);

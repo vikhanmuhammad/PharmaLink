@@ -22,7 +22,8 @@ class Obat_model extends CI_Model {
 
     public function update($id, $data)
     {
-        return $this->db->where('OBAT_ID', $id)->update($this->table, $data);
+        $this->db->where('OBAT_ID', $id);
+        return $this->db->update('OBAT', $data);
     }
 
     public function delete($id)

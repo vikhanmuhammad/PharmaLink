@@ -9,7 +9,6 @@ class Obat extends CI_Controller {
         $this->load->model('Obat_model');
         $this->load->library('session');
 
-        // hanya Admin Farmasi yang boleh akses
         if ($this->session->userdata('role') != 'admin_farmasi' && $this->session->userdata('role') != 'super_admin') {
             redirect('auth/no_access');
         }
@@ -18,6 +17,16 @@ class Obat extends CI_Controller {
     public function index()
     {
         $data['obat'] = $this->Obat_model->get_all();
+
+        if (!empty($data['obat']) && is_array($data['obat'])) {
+            foreach ($data['obat'] as $item_obat) {
+                foreach ($item_obat as $kolom => $nilai) {
+                    if ($nilai === null || $nilai === '') {
+                        $item_obat->$kolom = '-';
+                    }
+                }
+            }
+        }
         $this->load->view('farmasi/aturobat/stokobat', $data);
     }
 
@@ -38,24 +47,33 @@ class Obat extends CI_Controller {
         $this->load->view('farmasi/aturobat/tambahobat');
     }
 
-    public function edit($id)
+    public function edit_action()
     {
-        if ($this->input->post()) {
+        $id = $this->input->post('obat_id', TRUE);
+    
+        if ($id) {
             $data = [
-                'NAMA_OBAT'   => $this->input->post('nama_obat'),
-                'JENIS'       => $this->input->post('jenis'),
-                'KATEGORI'    => $this->input->post('kategori'),
-                'GENERIC'     => $this->input->post('generic'),
-                'KETERANGAN'  => $this->input->post('keterangan'),
-                'STOK'        => $this->input->post('stok'),
+                'NAMA_OBAT'  => $this->input->post('nama_obat', TRUE),
+                'JENIS'      => $this->input->post('jenis', TRUE),
+                'KATEGORI'   => $this->input->post('kategori', TRUE),
+                'GENERIC'    => $this->input->post('generic', TRUE),
+                'KETERANGAN' => $this->input->post('keterangan', TRUE),
+                'STOK'       => $this->input->post('stok', TRUE),
             ];
-            $this->Obat_model->update($id, $data);
-            redirect('obat');
+    
+            if ($this->Obat_model->update($id, $data)) {
+                $this->session->set_flashdata('success', 'Data obat berhasil diperbarui.');
+            } else {
+                $this->session->set_flashdata('error', 'Update gagal.');
+            }
+        } else {
+            $this->session->set_flashdata('error', 'ID Obat tidak ditemukan.');
         }
-        $data['obat'] = $this->Obat_model->get_by_id($id);
-        $this->load->view('farmasi/aturobat/edit', $data);
+    
+        redirect('obat');
     }
-
+    
+    
     public function hapus($id)
     {
         $this->Obat_model->delete($id);
