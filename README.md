@@ -1,40 +1,93 @@
-PharmaLink – Sistem Manajemen Farmasi Rumah Sakit
+# 💊 PharmaLink – Sistem Manajemen Farmasi Rumah Sakit
 
-Versi: 1.0.0
-Dibuat dengan: CodeIgniter 3, Oracle Database, HTML/CSS
+**Versi:** 1.0.0  
+**Dibuat dengan:** CodeIgniter 3, Oracle Database, HTML/CSS  
 
-Deskripsi / Description
+---
 
-Bahasa Indonesia:
-PharmaLink adalah sistem manajemen farmasi berbasis web yang dirancang untuk rumah sakit. Sistem ini memudahkan dokter, perawat, dan admin farmasi dalam melakukan pengelolaan pasien, pemesanan obat, persetujuan stok, dan monitoring stok obat secara real-time.
+## 🏥 Deskripsi / Description
 
-Fitur utama:
+### 🇮🇩 Bahasa Indonesia
+**PharmaLink** adalah sistem manajemen farmasi berbasis web yang dirancang untuk **rumah sakit**.  
+Sistem ini memudahkan **dokter, perawat, dan admin farmasi** dalam melakukan:
+- Pengelolaan data pasien  
+- Pemesanan obat  
+- Persetujuan stok  
+- Monitoring stok obat secara *real-time*  
 
-Dashboard dokter & perawat untuk melihat dan menambahkan pasien.
+### 🇬🇧 English
+**PharmaLink** is a **web-based pharmacy management system** designed for **hospitals**.  
+The system helps **doctors, nurses, and pharmacy admins** to:
+- Manage patient records  
+- Place and approve medication orders  
+- Control and monitor stock levels in *real-time*  
 
-Pemesanan obat oleh dokter/perawat dengan status pending.
+---
 
-Dashboard admin farmasi untuk menyetujui atau menolak pemesanan.
+## ⚙️ Fitur Utama / Key Features
 
-Pengurangan stok otomatis saat pemesanan disetujui.
+- 🩺 **Dashboard Dokter & Perawat**  
+  Melihat dan menambahkan data pasien.
 
-Peringatan jika stok obat tidak mencukupi.
+- 💊 **Pemesanan Obat**  
+  Dilakukan oleh dokter atau perawat dengan status *pending*.
 
-History pemesanan obat dengan nama pasien, obat, jumlah, dan penginput.
+- 🧾 **Dashboard Admin Farmasi**  
+  Menyetujui atau menolak pemesanan obat.
 
-English:
-PharmaLink is a web-based pharmacy management system designed for hospitals. The system enables doctors, nurses, and pharmacy admins to manage patients, order medications, approve stock requests, and monitor inventory in real-time.
+- 🔄 **Pengurangan Stok Otomatis**  
+  Terjadi secara otomatis saat pemesanan disetujui.
 
-Key features:
+- ⚠️ **Peringatan Stok Kurang**  
+  Sistem memberikan notifikasi jika stok obat tidak mencukupi.
 
-Doctor & nurse dashboard for viewing and adding patients.
+- 📜 **Riwayat Pemesanan Obat**  
+  Menampilkan nama pasien, obat, jumlah, dan pengguna yang menginput.
 
-Medication ordering by doctors/nurses with pending status.
+---
 
-Pharmacy admin dashboard for approving or rejecting orders.
+## 🧱 Teknologi yang Digunakan / Built With
 
-Automatic stock deduction when orders are approved.
+| Komponen | Teknologi |
+|-----------|------------|
+| Framework Backend | CodeIgniter 3 |
+| Database | Oracle Database |
+| Frontend | HTML, CSS |
+| Server | Apache / Oracle-compatible web server |
 
-Alerts if medication stock is insufficient.
+---
 
-Order history showing patient name, medication, quantity, and input staff.
+## 👥 Role Pengguna / User Roles
+
+| Role | Deskripsi |
+|------|------------|
+| 👨‍⚕️ Dokter / Perawat | Dapat melihat dan menambahkan pasien serta memesan obat |
+| 🧑‍🔬 Admin Farmasi | Menyetujui atau menolak pemesanan obat, mengelola stok |
+| 🧑‍💼 Administrator | Mengelola data pengguna, hak akses, dan konfigurasi sistem |
+
+---
+
+## 📈 Roadmap (Versi Selanjutnya)
+
+- [ ] Integrasi API untuk data pasien dari sistem rumah sakit utama  
+- [ ] Modul laporan stok obat per periode  
+- [ ] Fitur ekspor data ke Excel / PDF  
+- [ ] Autentikasi multi-level berbasis token  
+
+---
+
+## 🧑‍💻 Kontributor
+
+- **Nama Pengembang:** [Vikhan Muhammad](https://github.com/vikhanmuhammad)  
+- **Peran:** Developer & System Analyst  
+
+---
+
+## 🪪 Lisensi / License
+
+Proyek ini dibuat untuk tujuan pembelajaran dan penelitian internal.  
+Tidak untuk penggunaan komersial tanpa izin.  
+
+---
+
+> _“Empowering hospital pharmacy operations through digital efficiency.”_
